@@ -5,6 +5,7 @@
   "main": "gen-html.js",
   "scripts": {
     "lint": "markdownlint ./README*.md"
+    "test": "echo \"No tests yet\" && exit 0"
   },
   "repository": {
     "type": "git",

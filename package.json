@@ -1,10 +1,9 @@
 {
   "name": "nodebestpractices",
   "version": "1.0.0",
-  "description": "[✔]: assets/images/checkbox-small-blue.png",
-  "main": "gen-html.js",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "lint": "markdownlint ./README*.md"
     "test": "echo \"No tests yet\" && exit 0"
   },
   "repository": {

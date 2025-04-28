@@ -2,54 +2,44 @@ pipeline {
     agent any
 
     environment {
-        NODE_ENV = 'development'
+        IMAGE_NAME = 'shahrrukh/node-jenkins-docker'
     }
 
     stages {
-        stage('Checkout') {
+        stage('Clone Repo') {
             steps {
-                checkout scm
+                git 'https://github.com/Shahrukh-Khan644/nodebestpractices.git'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Installing dependencies...'
-                sh 'npm install'
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
-        stage('Lint') {
+        stage('Login to DockerHub') {
             steps {
-                echo 'Running linter...'
-                sh 'npm run lint || echo "Linting completed with warnings."'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+                    sh 'echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin'
+                }
             }
         }
 
-        stage('Run Tests') {
+        stage('Push Docker Image') {
             steps {
-                echo 'Running tests...'
-                sh 'npm test'
+                sh 'docker push $IMAGE_NAME'
             }
         }
 
-        stage('Build (Optional)') {
-            when {
-                expression { fileExists('build') || fileExists('build.js') }
-            }
+        stage('Deploy Container') {
             steps {
-                echo 'Running build script...'
-                sh 'npm run build || echo "No build step found."'
-            }
-        }
-    }
+                // Optionally stop old container if running
+                sh 'docker stop node-app || true && docker rm node-app || true'
 
-    post {
-        success {
-            echo '✅ All steps completed successfully!'
-        }
-        failure {
-            echo '❌ Build failed. Please check the logs above.'
+                // Run new container
+                sh 'docker run -d --name node-app -p 3000:3000 $IMAGE_NAME'
+            }
         }
     }
 }
